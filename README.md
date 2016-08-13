@@ -2,8 +2,8 @@
 
 ## Objectives
 
-1. Learn about bcrypt, a gem that works to encrypt passwords
-2. Learn about Active Record's `has_secure_password` method
+1. Learn about bcrypt, a gem that works to encrypt passwords.
+2. Learn about Active Record's `has_secure_password` method.
 3. Sign up and in a user with a secure, encrypted password.
 
 ## Overview
@@ -16,18 +16,19 @@ We'll use an open-source gem, `bcrypt`, to implement this strategy.
 
 ## Starter Code
 
-We've got a basic Sinatra MVC application. In our `application_controller` we have two helper methods defined: `logged_in?` returns true or false based on the presence of a `session[:user_id]` and `current_user` returns the instance of the logged in user, based on the `session[:user_id]`. We have five actions defined:
+We've got a basic Sinatra MVC application. In our `application_controller` we have two helper methods defined: `logged_in?` returns true or false based on the presence of a `session[:user_id]` and `current_user` returns the instance of the logged in user, based on the `session[:user_id]`. 
 
+We have five actions defined:
 + `get "/" do` renders an `index.erb` file with links to signup or login.
 + `get '/signup'` renders a form to create a new user. The form includes fields form `username` and `password`.
 + `get '/login'` renders a form for logging in.
-+ `get '/success'` renders a `success.erb` page, which should be displayed once a user successfully logs in
++ `get '/success'` renders a `success.erb` page, which should be displayed once a user successfully logs in.
 + `get '/failure'` renders a `failure.erb` page. This will be accessed if there is an error logging in or signing up.
 + `get '/logout'` clears the session data and redirects to the home page.
 
 We've also stubbed out a user model in `app/models/user.rb` that inherits from `ActiveRecord::Base`.
 
-Fork and clone this repository and run `bundle install` to get started! Preview your work by running `shotgun` and navigating to http://localhost:9393 in your browser.
+Fork and clone this repository and run `bundle install` to get started. Preview your work by running `shotgun` and navigating to http://localhost:9393 in your browser.
 
 ## Password Encryption with BCrypt
 
@@ -35,15 +36,12 @@ BCrypt will store a salted, hashed version of our users password in our database
 
 ### Implementing BCrypt
 
-We've created a migration file for you ( using `rake db:create_migration
-NAME=create_users`), but you'll need to fill it in. Let's edit that file so that
-it actually creates a `users` table. We'll have two columns: one for `username`
-and one for `password_digest`.
+We've created a migration file for you (using `rake db:create_migration NAME=create_users`), but you'll need to fill it in. Let's edit that file so that it actually creates a `users` table. We'll have two columns: one for `username` and one for `password_digest`.
 
 ```ruby
 class CreateUsers < ActiveRecord::Migration
   def up
-  	create_table :users do |t|
+    create_table :users do |t|
   		t.string :username
   		t.string :password_digest
   	end
@@ -57,13 +55,9 @@ end
 
 Run this migration using `rake db:migrate`. Awesome job!
 
-
 ### ActiveRecord's `has_secure_password`
 
-Next, let's update our user model so that it includes `has_secure_password`. This ActiveRecord macro gives us access to a few new methods. A macro is a method that when called, creates methods for you. This is meta programming, which you don't need to worry about now. Just know that using a macros is just like calling a normal ruby method.
-
-In this case, the macro `has_secure_password` is being called just like a normal ruby method. It works in conjunction with a gem called `bcrypt` and gives us all of those abilities in a secure way that doesn't actually store the plain text password in the database.
-
+Next, let's update our user model so that it includes `has_secure_password`. This ActiveRecord macro gives us access to a few new methods. A macro is a method that when called, creates methods for you. This is meta programming. Using a macro here is just like calling a normal ruby method. In this case, the macro `has_secure_password` is being called. It works in conjunction with a gem called `bcrypt` and gives us extra abilities to use and store passwords in a secure way that doesn't actually store the plain text password in the database.
 
 ```ruby
 class User < ActiveRecord::Base
@@ -71,11 +65,9 @@ class User < ActiveRecord::Base
 	has_secure_password
 
 end
-
 ```
 
-Next, let's handle signing up. In our `post '/signup'` action, let's make a new instance of our user class with a username and password from params. Note that even though our database has a column called `password_digest`, we still access the attribute of `password`. This is given to us by `has_secure_password`. You can read more about that in the [Ruby Docs](http://api.rubyonrails.org/classes/ActiveModel/SecurePassword/ClassMethods.html#method-i-has_secure_password).
-
+Next, let's handle user sign-up. In our `post '/signup'` action, let's make a new instance of our user class with a username and password from params. Note that even though our database has a column called `password_digest`, we still access the attribute of `password`. This is given to us by `has_secure_password`. You can read more about that in the [Ruby Docs](http://api.rubyonrails.org/classes/ActiveModel/SecurePassword/ClassMethods.html#method-i-has_secure_password).
 
 ```ruby
 	post "/signup" do
@@ -95,9 +87,9 @@ Because our user has `has_secure_password`, we won't be able to save this to the
 	end
 ```
 
-Awesome! Test this feature out in your browser. Leaving the password field blank should land you at the "failure" page, while creating a valid user should take you to login.
+Great! Now test this feature out in your browser. Leaving the password field blank should land you at the "failure" page, while creating a valid user should take you to login.
 
-Next, create at least one valid user, then let's build out our login action. In `post '/login'`, let's find the user by username.
+Next, create at least one valid user, and then we'll build our login action. In `post '/login'`, let's find the user by username.
 
 ```ruby
 	post "/login" do
@@ -118,7 +110,7 @@ Next, we need to check two conditions: first, did we find a user with that usern
 	end
 ```
 
-We also need to check if that user's password matches up with our password_digest. We can use a method called `authenticate`. The method is provided for us by the bcrypt gem. Our `authenticate` method takes a string as an argument. If the string matches up against the password digest, it will return the user object, otherwise it will return false. Therefore, we can check that we have a user AND that the user is authenticated. If so, we'll set the `session[:user_id]` and redirect to the `/success` route. Otherwise, we'll redirect to the `/failure` route so our user can try again.
+We also need to check if that user's password matches up with our password_digest. We can use a method called `authenticate`. The method is provided for us by the bcrypt gem. Our `authenticate` method takes a string as an argument. If the string matches the password digest, it will return the user object; otherwise it will return false. Therefore, we can check that we have a user AND that the user is authenticated. If so, we'll set the `session[:user_id]` and redirect to the `/success` route. Otherwise, we'll redirect to the `/failure` route so our user can try again.
 
 
 ```ruby
@@ -133,7 +125,7 @@ We also need to check if that user's password matches up with our password_diges
 	end
 ```
 
-Awesome job! We've now built out a basic authentication system for a user without storing a plain-text password in our database.
+Fantastic job! We've now built a basic authentication system for a user without storing a plain-text password in our database.
 
 ## Video Review
 
